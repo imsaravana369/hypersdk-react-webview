@@ -1,31 +1,30 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'hypersdk-react-webview';
+import {
+  attachJuspayWebview,
+  handleJuspayEvents,
+} from 'hypersdk-react-webview';
+
+import WebView, { type WebViewMessageEvent } from 'react-native-webview';
+import { useEffect } from 'react';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
-  }, []);
-
+  const webViewRef = React.useRef<WebView | null>(null);
+  useEffect(() => {
+    console.log('girija attaching Juspaywebview exampleapp');
+    attachJuspayWebview(webViewRef);
+    return () => {};
+  });
+  const handleMessage = (ev: WebViewMessageEvent) => {
+    console.log('My onMessage');
+    handleJuspayEvents(webViewRef)(ev);
+  };
   return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
+    <WebView
+      ref={webViewRef}
+      source={{ uri: 'http://localhost:4200' }}
+      onMessage={handleMessage}
+      onNavigationStateChange={() => attachJuspayWebview(webViewRef)}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
-  },
-});
